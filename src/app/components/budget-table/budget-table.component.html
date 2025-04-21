@@ -1,0 +1,110 @@
+<table class="table-auto border-collapse w-full">
+    <thead>
+        <tr class="bg-gray-200">
+            <th class="border px-2 py-2 text-left min-w-[320px] text-[18px]">
+                <div class="flex flex-wrap flex-row items-center">
+                    <span class="w-[50px]">Start:</span>
+                    <input type="month" [(ngModel)]="startDate" class="w-[100px] py-2"
+                        (ngModelChange)="onDateChange()" />
+                    <span class="w-[50px]">End:</span>
+                    <input type="month" [(ngModel)]="endDate" class="w-[100px] py-2" (ngModelChange)="onDateChange()" />
+                </div>
+            </th>
+            <th *ngFor="let month of months()" class="border px-2 py-2 text-center min-w-[120px] text-[18px]">
+                {{ month }}
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <ng-container *ngFor="let parent of parents(); let parentIndex = index">
+            <tr>
+                <td colspan="100%" class="border bg-gray-100 font-semibold px-2 py-1 text-[16px]">{{ parent.name }}</td>
+            </tr>
+
+            <ng-container *ngFor="let group of getRowsByParentName(parent.name); let rowIndex = index">
+                <tr>
+                    <td class="border px-4 py-1 font-medium text-[14px]">{{ group.name }}</td>
+                    <td *ngFor="let month of months()" class="border px-2 py-1"></td>
+                </tr>
+
+                <tr *ngFor="let row of group.values; let monthIndex = index">
+                    <td *ngIf="!!row.renamed" class="border px-6 py-1 text-[14px]"
+                        (contextmenu)="$event.preventDefault(); deleteRow(row, $event)"> {{
+                        row.name }}</td>
+
+                    <td *ngIf="!row.renamed" class="border px-6 py-1">
+                        <cell-input [type]="'text'"
+                            [class]="'text-left text-[14px] w-full border-none shadow-none outline-none'"
+                            [(value)]="row.name" (keydown.enter)="row.renamed = true" />
+                    </td>
+
+                    <td *ngFor="let month of months(); let cellIndex = index" class="border px-2 py-1">
+                        <cell-input #cell [type]="'number'"
+                            [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
+                            [(value)]="row.values[cellIndex]"
+                            (keydown)="handleKeyDown($event, getRowIndexById(row.id), cellIndex)"
+                            (contextmenu)="$event.preventDefault(); applyToAll(getRowIndexById(row.id), cellIndex, $event)" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border px-6 py-1">
+                        <button (click)="createCell(parent.name, group.name)"
+                            class="text-[14px] text-left text-blue-500">Add New
+                            `{{group.name}} {{ parent.name }}`</button>
+                    </td>
+                    <td *ngFor="let month of months()" class="border px-2 py-1">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border px-6 py-1 text-[14px] font-medium">Sub Totals ({{ group.name }} {{ parent.name }})
+                    </td>
+                    <td *ngFor="let month of months(); let monthIndex = index"
+                        class="border px-2 py-1 text-center text-[14px] font-medium">
+                        {{ calculateTotalByGroupAndMonth(group.values, monthIndex) }}
+                    </td>
+                </tr>
+            </ng-container>
+
+            <tr>
+                <td class="border px-4 py-1 font-medium text-[16px]">Totals {{ parent.name }}</td>
+                <td *ngFor="let month of months(); let monthIndex = index"
+                    class="border px-2 py-1 text-center text-[14px] font-medium">
+                    {{ calculateTotalByParentAndMonth(parent.name, monthIndex) }}
+                </td>
+            </tr>
+
+            <tr>
+                <th class="border px-2 py-2 h-[32px]"></th>
+                <td *ngFor="let month of months()" class="border px-2 py-2 h-[32px]">
+                </td>
+            </tr>
+
+        </ng-container>
+    </tbody>
+    <tfoot>
+        <tr class="bg-gray-100 font-medium">
+            <td class="border px-2 py-1 text-[16px]">Profit / Loss</td>
+            <td *ngFor="let month of months(); let monthIndex = index" class="border px-2 py-1 text-center text-[16px]">
+                {{ calculateProfits(monthIndex) }}
+            </td>
+        </tr>
+
+        <tr class="font-medium">
+            <td class="border px-2 py-1 text-[16px]">Opening Balance</td>
+            <td *ngFor="let month of months(); let monthIndex = index" class="border px-2 py-1 text-center text-[16px]">
+                {{ calculateOpenningBalance(monthIndex) }}
+            </td>
+        </tr>
+
+        <tr class="font-medium">
+            <td class="border px-2 py-1 text-[16px]">Closing Balance</td>
+            <td *ngFor="let month of months(); let monthIndex = index" class="border px-2 py-1 text-center text-[16px]">
+                {{ calculateProfits(monthIndex) + calculateOpenningBalance(monthIndex) }}
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+<p-toast />
+<p-confirmpopup />
