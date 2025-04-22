@@ -31,8 +31,8 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ```bash
 git clone https://github.com/YuSuBui/budget-builder-example.git
-cd budget-builder-angular
 git checkout develop
+cd budget-builder-example
 ```
 
 ### Install dependencies
