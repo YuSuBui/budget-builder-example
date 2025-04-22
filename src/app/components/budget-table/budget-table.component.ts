@@ -70,8 +70,8 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
     }
 
     headlines = computed(() => {
-        const start = this.startDate.toLocaleString('default', { month: "2-digit", year: 'numeric' });
-        const end = this.endDate.toLocaleString('default', { month: "2-digit", year: 'numeric' });
+        const start = this.startMonth().toLocaleString('default', { month: "2-digit", year: 'numeric' });
+        const end = this.endMonth().toLocaleString('default', { month: "2-digit", year: 'numeric' });
         return `Start from: ${start} to: ${end}`;
     });
 
