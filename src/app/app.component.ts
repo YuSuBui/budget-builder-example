@@ -7,14 +7,22 @@ import { DatePickerModule } from 'primeng/datepicker';
 @Component({
     selector: 'app-root',
     imports: [CommonModule, FormsModule, DatePickerModule, BudgetTableComponent],
+    standalone: true,
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
 export class AppComponent {
     title = 'budget-builder-example';
-    startDate = new Date(2024, 0);
-    endDate = new Date(2024, 11);
+    dateRange: Date[] = [new Date(2024, 0), new Date(2024, 11)];
 
     constructor() {
+    }
+
+    get startDate(): Date {
+        return this.dateRange[0];
+    }
+
+    get endDate(): Date {
+        return this.dateRange[1];
     }
 }

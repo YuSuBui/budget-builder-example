@@ -3,18 +3,12 @@
         <div class="p-4 flex flex-wrap flex-row justify-between items-center">
             <h2 class="text-2xl font-bold text-center">Budget Builder Example</h2>
             <div class="flex flex-wrap flex-row items-center date-range">
-                <div class="flex flex-wrap flex-row items-center px-2">
-                    <span class="font-medium w-[100px]">Start date:</span>
-                    <p-datepicker [(ngModel)]="startDate" view="month" dateFormat="mm/yy" />
-                </div>
-                <div class="flex flex-wrap flex-row items-center px-2">
-                    <span class="font-medium w-[100px]">End date:</span>
-                    <p-datepicker [(ngModel)]="endDate" view="month" dateFormat="mm/yy" />
-                </div>
+                <span class="font-medium w-[120px]">Date range:</span>
+                <p-datepicker [(ngModel)]="dateRange" selectionMode="range" view="month" dateFormat="mm/yy" />
             </div>
         </div>
 
-        <div class="px-0 py-2 overflow-auto">
+        <div class="px-4 py-2 overflow-auto">
             <app-budget-table [startDate]="startDate" [endDate]="endDate"></app-budget-table>
         </div>
     </div>

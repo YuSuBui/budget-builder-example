@@ -32,6 +32,7 @@ const BudgetRows = [
 
 @Component({
     selector: 'app-budget-table',
+    standalone: true,
     imports: [CommonModule, FormsModule, ToastModule, ConfirmPopupModule, CellInputComponent],
     providers: [ConfirmationService, MessageService],
     templateUrl: './budget-table.component.html',
@@ -56,6 +57,7 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
     }
 
     ngOnChanges(): void {
+        if (!this.startDate || !this.endDate) return;
         this.startMonth.set(this.startDate);
         this.endMonth.set(this.endDate);
     }
