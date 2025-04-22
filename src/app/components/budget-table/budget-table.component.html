@@ -2,13 +2,7 @@
     <thead>
         <tr class="bg-gray-200">
             <th class="border px-2 py-2 text-left min-w-[320px] text-[18px]">
-                <div class="flex flex-wrap flex-row items-center">
-                    <span class="w-[50px]">Start:</span>
-                    <input type="month" [(ngModel)]="startDate" class="w-[100px] py-2"
-                        (ngModelChange)="onDateChange()" />
-                    <span class="w-[50px]">End:</span>
-                    <input type="month" [(ngModel)]="endDate" class="w-[100px] py-2" (ngModelChange)="onDateChange()" />
-                </div>
+                <span class="">{{headlines()}}</span>
             </th>
             <th *ngFor="let month of months()" class="border px-2 py-2 text-center min-w-[120px] text-[18px]">
                 {{ month }}
@@ -34,26 +28,17 @@
                         row.name }}</td>
 
                     <td *ngIf="!row.renamed" class="border px-6 py-1">
-                        <cell-input [type]="'text'"
-                            [class]="'text-left text-[14px] w-full border-none shadow-none outline-none'"
-                            [(value)]="row.name" (keydown.enter)="row.renamed = true" />
+                        <cell-input #renameCell [type]="'text'"
+                            [class]="'rename-cell-input text-left text-[14px] w-full border-none shadow-none outline-none'"
+                            [(value)]="row.name" (keydown)="onRenameKeyDown($event, row);" />
                     </td>
 
                     <td *ngFor="let month of months(); let cellIndex = index" class="border px-2 py-1">
                         <cell-input #cell [type]="'number'"
                             [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
                             [(value)]="row.values[cellIndex]"
-                            (keydown)="handleKeyDown($event, getRowIndexById(row.id), cellIndex)"
+                            (keydown)="handleKeyDown($event, row, cellIndex, monthIndex === group.values.length - 1)"
                             (contextmenu)="$event.preventDefault(); applyToAll(getRowIndexById(row.id), cellIndex, $event)" />
-                    </td>
-                </tr>
-                <tr>
-                    <td class="border px-6 py-1">
-                        <button (click)="createCell(parent.name, group.name)"
-                            class="text-[14px] text-left text-blue-500">Add New
-                            `{{group.name}} {{ parent.name }}`</button>
-                    </td>
-                    <td *ngFor="let month of months()" class="border px-2 py-1">
                     </td>
                 </tr>
                 <tr>
@@ -82,6 +67,7 @@
 
         </ng-container>
     </tbody>
+
     <tfoot>
         <tr class="bg-gray-100 font-medium">
             <td class="border px-2 py-1 text-[16px]">Profit / Loss</td>

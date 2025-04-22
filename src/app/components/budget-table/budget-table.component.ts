@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, QueryList, signal, ViewChildren, WritableSignal } from '@angular/core';
+import { AfterViewInit, Component, computed, Input, OnChanges, QueryList, signal, ViewChildren, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -37,13 +37,15 @@ const BudgetRows = [
     templateUrl: './budget-table.component.html',
     styleUrl: './budget-table.component.css'
 })
-export class BudgetTableComponent implements AfterViewInit {
-    startDate = "2024-01";
-    endDate = "2024-11";
-    startMonth = signal<Date>(new Date(this.startDate));
-    endMonth = signal<Date>(new Date(this.endDate));
+export class BudgetTableComponent implements OnChanges, AfterViewInit {
+    @Input('startDate') startDate!: Date;
+    @Input('endDate') endDate!: Date;
+    startMonth = signal<Date>(new Date(2024, 0));
+    endMonth = signal<Date>(new Date(2024, 11));
+
     data: WritableSignal<BudgetRow[]> = signal<BudgetRow[]>([]);
     @ViewChildren('cell') cellInputs!: QueryList<CellInputComponent>;
+    @ViewChildren('renameCell') renameCells!: QueryList<CellInputComponent>;
 
     constructor(private confirmationService: ConfirmationService, private messageService: MessageService) {
         this.data.set(Array.from(BudgetRows).map(raw => ({
@@ -53,15 +55,31 @@ export class BudgetTableComponent implements AfterViewInit {
         })));
     }
 
+    ngOnChanges(): void {
+        this.startMonth.set(this.startDate);
+        this.endMonth.set(this.endDate);
+    }
+
     ngAfterViewInit() {
         const firstCell = this.cellInputs?.get(0);
         firstCell?.focus();
+
+        this.renameCells.changes.subscribe((queryList: QueryList<CellInputComponent>) => {
+            queryList.get(0)?.focus();
+        });
     }
+
+    headlines = computed(() => {
+        const start = this.startDate.toLocaleString('default', { month: "2-digit", year: 'numeric' });
+        const end = this.endDate.toLocaleString('default', { month: "2-digit", year: 'numeric' });
+        return `Start from: ${start} to: ${end}`;
+    });
 
     months = computed(() => {
         const months: string[] = [];
         const start = new Date(this.startMonth());
         const end = new Date(this.endMonth());
+
         while (start <= end) {
             const monthStr = start.toLocaleString('default', { month: "short", year: 'numeric' });
             months.push(monthStr);
@@ -123,7 +141,7 @@ export class BudgetTableComponent implements AfterViewInit {
         return openingBalances;
     }
 
-    createCell(parent: string, group: string): void {
+    createCell(parent: string, group: string, index: number): void {
         const newCell: BudgetRow = {
             id: Date.now(),
             name: '',
@@ -132,7 +150,9 @@ export class BudgetTableComponent implements AfterViewInit {
             values: Array(this.months().length).fill(0),
             renamed: false
         };
-        this.data.set([...this.data(), newCell]);
+        const updatedData = Array.from(this.data());
+        updatedData.splice(index, 0, newCell);
+        this.data.set([...updatedData]);
     }
 
     deleteRow(r: BudgetRow, event: Event): void {
@@ -190,13 +210,9 @@ export class BudgetTableComponent implements AfterViewInit {
 
     }
 
-    onDateChange(): void {
-        this.startMonth.set(new Date(this.startDate));
-        this.endMonth.set(new Date(this.endDate));
-    }
-
-    handleKeyDown(event: KeyboardEvent, rowIndex: number, colIndex: number): void {
-        const cols = this.data()[0].values.length;
+    handleKeyDown(event: KeyboardEvent, row: BudgetRow, colIndex: number, isCreated: boolean): void {
+        const cols = this.months().length;
+        const rowIndex = this.getRowIndexById(row.id);
         const idx = rowIndex * cols + colIndex;
 
         switch (event.key) {
@@ -205,7 +221,24 @@ export class BudgetTableComponent implements AfterViewInit {
             case 'ArrowDown': this.cellInputs.get(idx + cols)?.focus(); break;
             case 'ArrowUp': this.cellInputs.get(idx - cols)?.focus(); break;
             case 'Tab': event.preventDefault(); this.cellInputs.get(idx + 1)?.focus(); break;
-            case 'Enter': event.preventDefault(); this.cellInputs.get(idx + cols)?.focus(); break;
+            case 'Enter':{
+                event.preventDefault();
+                if (isCreated) {
+                    this.createCell(row.parent, row.group, rowIndex + 1);
+                } else {
+                    this.cellInputs.get(idx + cols)?.focus();
+                }
+                break;
+            }
         }
+    }
+
+    onRenameKeyDown(event: KeyboardEvent, row: BudgetRow): void {
+        if (event.key !== 'Enter' || !row.name) return;
+        row.renamed = true;
+        const cols = this.months().length;
+        const rowIndex = this.getRowIndexById(row.id);
+        const idx = rowIndex * cols;
+        this.cellInputs.get(idx)?.focus();
     }
 }
