@@ -1,4 +1,45 @@
+:host {
+    display: block;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+}
+
 table {
-    user-select: none;
+    width: 100%;
     border-collapse: collapse;
+}
+
+.table-scroll-wrapper {
+  max-height: 90vh; /* or any height you want */
+  overflow: auto;
+  position: relative;
+}
+
+/* Sticky header */
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border: 1px solid #000;
+}
+
+/* Sticky footer */
+tfoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  border: 1px solid #000;
+}
+
+thead tr th,
+tbody tr td,
+tfoot tr td {
+    border: 1px solid #000;
+}
+
+::ng-deep .p-button.trash-button,
+::ng-deep .p-button.trash-button:hover {
+    background: transparent !important;
+    border: 0 !important;
 }

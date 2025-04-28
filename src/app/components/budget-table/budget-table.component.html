@@ -1,96 +1,180 @@
-<table class="table-auto border-collapse w-full">
-    <thead>
-        <tr class="bg-gray-200">
-            <th class="border px-2 py-2 text-left min-w-[320px] text-[18px]">
-                <span class="">{{headlines()}}</span>
-            </th>
-            <th *ngFor="let month of months()" class="border px-2 py-2 text-center min-w-[120px] text-[18px]">
-                {{ month }}
-            </th>
-        </tr>
-    </thead>
-
-    <tbody>
-        <ng-container *ngFor="let parent of parents(); let parentIndex = index">
-            <tr>
-                <td colspan="100%" class="border bg-gray-100 font-semibold px-2 py-1 text-[16px]">{{ parent.name }}</td>
+<div class="table-scroll-wrapper">
+    <table class="table-auto border-collapse" style="width: 100%;">
+        <thead>
+            <tr class="bg-gray-400">
+                <th class="w-[32px] min-w-[32px]">
+                    <p-button icon="pi pi-trash" (click)="deleteRows()" styleClass="trash-button"/>
+                </th>
+                <th class="px-2 py-2 text-left min-w-[320px] text-[20px]">
+                    <span class="">{{headlines()}}</span>
+                </th>
+                <th *ngFor="let month of months()" class="px-2 py-2 text-center min-w-[120px] text-[20px]">
+                    {{ month }}
+                </th>
             </tr>
+        </thead>
+    
+        <ng-container *ngFor="let level1 of data(); trackBy: trackById">
+            <tbody>
+                <ng-container *ngIf="level1.children">
+                    <ng-container *ngFor="let level2 of level1.children; let level1Index = index; trackBy: trackById">
+                        <tr class="bg-gray-200">
+                            <td colspan="1" class="px-2 py-1">
+                                <p-checkbox [(ngModel)]="level2.checked" (ngModelChange)="onCheckBoxChange(level2, $event)" [binary]="true" />
+                            </td>
+                            <td *ngIf="!level2.renamed" colspan="100%" class="px-2 py-1 font-semibold text-[18px] cursor-pointer"
+                                (dblclick)="level2.renamed = true;">
+                                <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[310px]">
+                                    {{level1Index + 1}}. {{level2.name}}
+                                </p>
+                            </td>
+                            <td *ngIf="level2.renamed" colspan="100%" class="px-2 py-1 text-[18px]">
+                                <cell-input #renameCell [type]="'text'"
+                                    [class]="'rename-cell-input text-left text-[18px] w-[310px] border-none shadow-none outline-none'"
+                                    [row]="level2"
+                                    [colIndex]="level1Index"
+                                    [(value)]="level2.name"
+                                    (keydown.enter)="level2.renamed = false;"
+                                    (onBlurFunc)="level2.renamed = false;" />
+                            </td>
+                        </tr>
+        
+                        <ng-container *ngFor="let level3 of level2.children; let level2Index = index; trackBy: trackById">
+                            <tr class="bg-gray-100">
+                                <td colspan="1" class="px-4 py-1">
+                                    <p-checkbox [(ngModel)]="level3.checked" (ngModelChange)="onCheckBoxChange(level3, $event)" [binary]="true" />
+                                </td>
+                                <td *ngIf="!level3.renamed" colspan="100%" class="px-4 py-1 font-medium text-[16px] cursor-pointer"
+                                    (dblclick)="level3.renamed = true;">
+                                    <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[300px]" >
+                                        {{level3.name}}
+                                    </p>
+                                </td>
+                                <td *ngIf="level3.renamed" colspan="100%" class="px-4 py-1 text-[16px]">
+                                    <cell-input #renameCell 
+                                        [type]="'text'"
+                                        [class]="'rename-cell-input text-left text-[16px] w-[200px] border-none shadow-none outline-none'"
+                                        [(value)]="level3.name"
+                                        (keydown.enter)="level3.renamed = false;"
+                                        (onBlurFunc)="level3.renamed = false;" />
+                                </td>
+                            </tr>
+        
+                            <ng-container *ngFor="let level4 of level3.children;">
+                                <tr class="bg-gray-0">
+                                    <td colspan="1" class="px-6 py-1">
+                                        <p-checkbox [(ngModel)]="level4.checked" (ngModelChange)="onCheckBoxChange(level4, $event)" [binary]="true" />
+                                    </td>
+                                    <td *ngIf="!level4.renamed" colspan="1" class="px-6 py-1 font-normal text-[14px] cursor-pointer"
+                                        (dblclick)="level4.renamed = true;">
+                                        <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[260px]">
+                                            {{level4.name}}
+                                        </p>
+                                    </td>
+                                    <td *ngIf="level4.renamed" colspan="1" class="px-6 py-1 text-[14px]">
+                                        <cell-input 
+                                            #renameCell 
+                                            [type]="'text'"
+                                            [class]="'rename-cell-input text-left text-[14px] w-full border-none shadow-none outline-none'"
+                                            [(value)]="level4.name"
+                                            (keydown.enter)="level4.renamed = false; handleNextCell(level4, 0)"
+                                            (onBlurFunc)="level4.renamed = false;" />
+                                    </td>
+    
+                                    <ng-container *ngIf="level4.values">
+                                        <ng-container *ngFor="let month of months(); let monthIndex = index;">
+                                            <td class="px-2 py-1 text-[14px]">
+                                                <cell-input #cell [type]="'number'"
+                                                    [row]="level4"
+                                                    [colIndex]="monthIndex"
+                                                    [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
+                                                    [value]="level4.values[monthIndex]" 
+                                                    (valueChange)="updateRowByValue(level4, $event, monthIndex)"
+                                                    (keydown)="handleKeyDown($event, level4, monthIndex)"
+                                                    (contextmenu)="$event.preventDefault(); applyToAll($event, level4, monthIndex)" />
+                                            </td>
+                                        </ng-container>
+                                    </ng-container>
+        
+                                </tr>
+                            </ng-container>
+                            
+                            <tr>
+                                <td colspan="2" class="px-2 py-1 text-[14px] font-medium cursor-pointer"
+                                    (click)="addNewRowCategory(level3, 0)">
+                                    <p class="flex flex-row align-items-center">
+                                        <i class="pi pi-plus-circle mr-1" style="align-self: center;"></i>Add a new row of `{{level3.name}}` category
+                                    </p>
+                                </td>
+                                <td *ngFor="let month of months()" class="px-2 py-1"></td>
+                            </tr>
+                        </ng-container>
+                        
+                        <tr>
+                            <td colspan="2" class="px-2 py-1 text-[14px] font-medium">Sub Totals ({{level2.name}}) </td>
+                            <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-[14px] text-center font-medium">{{level2.totals[monthIndex]}}</td>
+                        </tr>
+        
+                        <tr>
+                            <td colspan="2" class="px-2 py-1 text-[16px] font-medium cursor-pointer"
+                                (click)="addNewRowCategory(level2, 1)">
+                                <p class="flex flex-row align-items-center">
+                                    <i class="pi pi-plus-circle mr-1" style="align-self: center;"></i>Add new sub-category
+                                </p>
+                            </td>
+                            <td *ngFor="let month of months()" class="px-2 py-1"></td>
+                        </tr>
+                        
+                        <tr>
+                            <td colspan="100%" class="px-2 py-1 h-[32px]"></td>
+                        </tr>
+        
+                    </ng-container>
 
-            <ng-container *ngFor="let group of getRowsByParentName(parent.name); let rowIndex = index">
-                <tr>
-                    <td class="border px-4 py-1 font-medium text-[14px]">{{ group.name }}</td>
-                    <td *ngFor="let month of months()" class="border px-2 py-1"></td>
+                    <tr>
+                        <td colspan="2" class="px-2 py-1 text-[18px] font-semibold cursor-pointer"
+                            (click)="addNewRowCategory(level1, 2)">
+                            <p class="flex flex-row align-items-center">
+                                <i class="pi pi-plus-circle mr-1" style="align-self: center;"></i>Add new category
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" class="px-2 py-1 h-[32px]"></td>
+                        <td *ngFor="let month of months()"></td>
+                    </tr>
+    
+                </ng-container>
+            </tbody>
+
+            <tfoot class="bg-gray-200">
+                <tr class="bg-gray-200 font-medium">
+                    <td colspan="2" class="px-2 py-1 text-[16px]">Profit / Loss</td>
+                    <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-center text-[16px]">
+                        {{ level1.totals ? level1.totals[monthIndex] : 0 }}
+                    </td>
                 </tr>
 
-                <tr *ngFor="let row of group.values; let monthIndex = index">
-                    <td *ngIf="!!row.renamed" class="border px-6 py-1 text-[14px]"
-                        (contextmenu)="$event.preventDefault(); deleteRow(row, $event)"> {{
-                        row.name }}</td>
-
-                    <td *ngIf="!row.renamed" class="border px-6 py-1">
-                        <cell-input #renameCell [type]="'text'"
-                            [class]="'rename-cell-input text-left text-[14px] w-full border-none shadow-none outline-none'"
-                            [(value)]="row.name" (keydown)="onRenameKeyDown($event, row);" />
-                    </td>
-
-                    <td *ngFor="let month of months(); let cellIndex = index" class="border px-2 py-1">
-                        <cell-input #cell [type]="'number'"
-                            [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
-                            [(value)]="row.values[cellIndex]"
-                            (keydown)="handleKeyDown($event, row, cellIndex, monthIndex === group.values.length - 1)"
-                            (contextmenu)="$event.preventDefault(); applyToAll(getRowIndexById(row.id), cellIndex, $event)" />
+                <tr class="bg-gray-200 font-medium">
+                    <td colspan="2" class="px-2 py-1 text-[16px]">Opening Balance</td>
+                    <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-center text-[16px]">
+                        {{calcuateOpeningBalance(level1)[monthIndex]}}
                     </td>
                 </tr>
-                <tr>
-                    <td class="border px-6 py-1 text-[14px] font-medium">Sub Totals ({{ group.name }} {{ parent.name }})
-                    </td>
-                    <td *ngFor="let month of months(); let monthIndex = index"
-                        class="border px-2 py-1 text-center text-[14px] font-medium">
-                        {{ calculateTotalByGroupAndMonth(group.values, monthIndex) }}
+
+                <tr class="bg-gray-200 font-medium">
+                    <td colspan="2" class="px-2 py-1 text-[16px]">Closing Balance</td>
+                    <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-center text-[16px]">
+                        {{calcuateClosingBalance(level1)[monthIndex]}}
                     </td>
                 </tr>
-            </ng-container>
 
-            <tr>
-                <td class="border px-4 py-1 font-medium text-[16px]">Totals {{ parent.name }}</td>
-                <td *ngFor="let month of months(); let monthIndex = index"
-                    class="border px-2 py-1 text-center text-[14px] font-medium">
-                    {{ calculateTotalByParentAndMonth(parent.name, monthIndex) }}
-                </td>
-            </tr>
-
-            <tr>
-                <th class="border px-2 py-2 h-[32px]"></th>
-                <td *ngFor="let month of months()" class="border px-2 py-2 h-[32px]">
-                </td>
-            </tr>
+            </tfoot>
 
         </ng-container>
-    </tbody>
-
-    <tfoot>
-        <tr class="bg-gray-100 font-medium">
-            <td class="border px-2 py-1 text-[16px]">Profit / Loss</td>
-            <td *ngFor="let month of months(); let monthIndex = index" class="border px-2 py-1 text-center text-[16px]">
-                {{ calculateProfits(monthIndex) }}
-            </td>
-        </tr>
-
-        <tr class="font-medium">
-            <td class="border px-2 py-1 text-[16px]">Opening Balance</td>
-            <td *ngFor="let month of months(); let monthIndex = index" class="border px-2 py-1 text-center text-[16px]">
-                {{ calculateOpenningBalance(monthIndex) }}
-            </td>
-        </tr>
-
-        <tr class="font-medium">
-            <td class="border px-2 py-1 text-[16px]">Closing Balance</td>
-            <td *ngFor="let month of months(); let monthIndex = index" class="border px-2 py-1 text-center text-[16px]">
-                {{ calculateProfits(monthIndex) + calculateOpenningBalance(monthIndex) }}
-            </td>
-        </tr>
-    </tfoot>
-</table>
+    </table>
+</div>
 
 <p-toast />
 <p-confirmpopup />

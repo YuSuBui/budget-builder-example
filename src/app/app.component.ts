@@ -18,11 +18,11 @@ export class AppComponent {
     constructor() {
     }
 
-    get startDate(): Date {
-        return this.dateRange[0];
+    get startDate(): Date | undefined {
+        return this.dateRange ? this.dateRange[0] : undefined;
     }
 
-    get endDate(): Date {
-        return this.dateRange[1];
+    get endDate(): Date | undefined {
+        return this.dateRange ? this.dateRange[1] : undefined;
     }
 }

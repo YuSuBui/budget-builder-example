@@ -1,2 +1,7 @@
-<input type="text" #input [className]="class" [(ngModel)]="value" (ngModelChange)="onInputChange($event)"
-    (focus)="onFocusFunc()" (blur)="onUnFocusFunc()" />
+<input #input
+    type="text"
+    [className]="class" 
+    [ngModel]="value" 
+    (ngModelChange)="onInputChange($event)"
+    (focus)="onFocusFunc()" 
+    (blur)="onUnFocusFunc()" />

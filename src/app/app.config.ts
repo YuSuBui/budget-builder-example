@@ -6,8 +6,9 @@ import Aura from '@primeng/themes/aura';
 export const appConfig: ApplicationConfig = {
   providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideAnimations(), providePrimeNG({
     theme: {
-      preset: Aura, options: {
-        darkModeSelector: '.my-app-light'
+      preset: Aura,
+      options: {
+        darkModeSelector: false
       }
     }
   })]
