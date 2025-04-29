@@ -49,7 +49,7 @@ export class CellInputComponent {
     onFocusFunc(): void {
         const parent = this.myInputRef.nativeElement.parentElement?.parentElement;
         if (parent) {
-            parent.style.border = '2px solid #000';
+            parent.style.border = '1.5px solid #000';
             parent.style.backgroundColor = "rgb(255, 255, 200)";
         }
     }
@@ -60,7 +60,7 @@ export class CellInputComponent {
     onUnFocusFunc(): void {
         const parent = this.myInputRef.nativeElement.parentElement?.parentElement;
         if (parent) {
-            parent.style.border = '1px solid #000';
+            parent.style.border = '0.75px solid #000';
             parent.style.background = 'transparent';
         }
         this.onBlurFunc.emit();
