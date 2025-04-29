@@ -37,12 +37,10 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['startDate'] && this.startDate ) {
             this.startMonth.set(this.startDate);
-            console.log('startDate', this.startMonth());
         }
 
         if (changes['endDate'] && this.endDate) {
             this.endMonth.set(this.endDate);
-            console.log('endDate', this.endMonth());
         }
 
         if (changes['data'] && this.data) {

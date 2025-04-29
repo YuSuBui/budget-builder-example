@@ -1,7 +1,7 @@
 export interface IBudgetRow {
     id: number;
     name: string;
-    typeId: string;
+    typeId?: string;
     parentCategoryId?: number; // 0 is Income, 1 is Expenses
     values?: number[];
     totals?: number[];
@@ -22,7 +22,6 @@ export const RawBudgetData: IBudgetRow[] = [
     {
         id: 0,
         name: 'General Income',
-        typeId: 'General Income',
         parentCategoryId: 0,
         values: [],
         totals: []
@@ -30,7 +29,6 @@ export const RawBudgetData: IBudgetRow[] = [
     {
         id: 1,
         name: 'Sales',
-        typeId: 'General Income',
         parentCategoryId: 0,
         values: [],
         totals: []
@@ -38,7 +36,6 @@ export const RawBudgetData: IBudgetRow[] = [
     {
         id: 2,
         name: 'Commission',
-        typeId: 'General Income',
         parentCategoryId: 0,
         values: [],
         totals: []
@@ -62,7 +59,6 @@ export const RawBudgetData: IBudgetRow[] = [
     {
         id: 5,
         name: 'Operational Expenses',
-        typeId: 'Operational Expenses',
         parentCategoryId: 1,
         values: [],
         totals: []
@@ -70,7 +66,6 @@ export const RawBudgetData: IBudgetRow[] = [
     {
         id: 6,
         name: 'Management Fees',
-        typeId: 'Operational Expenses',
         parentCategoryId: 1,
         values: [],
         totals: []
@@ -78,7 +73,6 @@ export const RawBudgetData: IBudgetRow[] = [
     {
         id: 7,
         name: 'Cloud Hosting',
-        typeId: 'Operational Expenses',
         parentCategoryId: 1,
         values: [],
         totals: []

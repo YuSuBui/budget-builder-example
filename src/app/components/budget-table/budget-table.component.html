@@ -5,10 +5,10 @@
                 <th colspan="1">
                     <p-button icon="pi pi-trash" (click)="deleteRows()" styleClass="trash-button" />
                 </th>
-                <th colspan="1" class="px-2 py-2 text-left text-[20px]">
+                <th colspan="1" class="px-2 py-2 text-left text-[18px]">
                     <span class="">{{headlines()}}</span>
                 </th>
-                <th colspan="1" *ngFor="let month of months()" class="px-2 py-2 text-center text-[20px]">
+                <th colspan="1" *ngFor="let month of months()" class="px-2 py-2 text-center text-[18px]">
                     {{ month }}
                 </th>
             </tr>
@@ -22,13 +22,13 @@
                             [binary]="true" />
                     </td>
                     <td *ngIf="!level1.renamable" colspan="1"
-                        class="px-2 py-1 font-semibold text-[18px] cursor-pointer"
+                        class="px-2 py-1 font-semibold text-[16px] cursor-pointer"
                         (dblclick)="level1.renamable = true;">
                         <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[310px]">
                             {{level1Index + 1}}. {{level1.name}}
                         </p>
                     </td>
-                    <td *ngIf="level1.renamable" colspan="1" class="px-2 py-1 text-[18px]">
+                    <td *ngIf="level1.renamable" colspan="1" class="px-2 py-1 text-[16px]">
                         <cell-input #renameCell [type]="'text'"
                             [class]="'rename-cell-input text-left text-[18px] w-[310px] border-none shadow-none outline-none'"
                             [row]="level1" [colIndex]="level1Index" [(value)]="level1.name"
@@ -40,80 +40,97 @@
 
                 <ng-container *ngIf="level1.children">
                     <ng-container *ngFor="let level2 of level1.children; let level2Index = index; trackBy: trackById">
-                        <tr *ngIf="level2Index !== 0">
+                        <tr>
                             <td colspan="1" class="px-2 py-1">
-                                <p-checkbox [(ngModel)]="level2.checked"
-                                    (ngModelChange)="onCheckBoxChange(level2, $event)" [binary]="true" />
+                                <p-checkbox 
+                                    [binary]="true"
+                                    [(ngModel)]="level2.checked"
+                                    (ngModelChange)="onCheckBoxChange(level2, $event)" />
                             </td>
                             <td *ngIf="!level2.renamable" colspan="1"
-                                class="px-2 py-1 font-semibold text-[18px] cursor-pointer"
+                                [ngClass]="{'font-normal text-[14px]': !level2.children, 'font-medium text-[16px]': level2.children}"
+                                class="px-2 py-1 cursor-pointer"
                                 (dblclick)="level2.renamable = true;">
                                 <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[310px]">
-                                    {{level1Index + 1}}.{{level2Index}}. {{level2.name}}
+                                    {{level2.name}}
                                 </p>
                             </td>
-                            <td *ngIf="level2.renamable" colspan="1" class="px-2 py-1 text-[18px]">
+                            <td *ngIf="level2.renamable" colspan="1" class="px-2 py-1">
                                 <cell-input #renameCell [type]="'text'"
-                                    [class]="'rename-cell-input text-left text-[18px] w-[310px] border-none shadow-none outline-none'"
+                                    [class]="'rename-cell-input text-left text-[16px] w-[310px] border-none shadow-none outline-none'"
                                     [row]="level2" [colIndex]="level1Index" [(value)]="level2.name"
                                     (keydown.enter)="level2.renamable = false; handleNextCell(level2, 0)"
                                     (onBlurFunc)="level2.renamable = false;" />
                             </td>
-                            <td colspan="1" *ngFor="let month of months()" class="px-2 py-1"></td>
-                        </tr>
 
-                        <ng-container *ngFor="let level3 of level2.children; trackBy: trackById">
+                            <ng-container *ngIf="!level2.children && level2.values">
+                                <ng-container *ngFor="let month of months(); let monthIndex = index; trackBy: trackByIndex">
+                                    <td colspan="1" class="px-2 py-1 text-[14px]">
+                                        <cell-input #cell [type]="'number'" [row]="level2" [colIndex]="monthIndex"
+                                            [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
+                                            [value]="level2.values[monthIndex]" (valueChange)="updateRowByValue(level2, $event, monthIndex)"
+                                            (keydown)="handleKeyDown($event, level2, monthIndex)"
+                                            (contextmenu)="$event.preventDefault(); applyToAll($event, level2, monthIndex)" />
+                                    </td>
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="level2.children">
+                                <td colspan="1" class="px-2 py-1" *ngFor="let month of months(); trackBy: trackByIndex"></td>
+                            </ng-container>
+                        </tr>
+                        
+                        <ng-container *ngIf="level2.children">
+                            <ng-container *ngFor="let level3 of level2.children; trackBy: trackById">
+                                <tr>
+                                    <td colspan="1" class="px-4 py-1">
+                                        <p-checkbox [(ngModel)]="level3.checked" (ngModelChange)="onCheckBoxChange(level3, $event)"
+                                            [binary]="true" />
+                                    </td>
+                                    <td *ngIf="!level3.renamable" colspan="1" class="px-4 py-1 font-medium text-[14px] cursor-pointer"
+                                        (dblclick)="level3.renamable = true;">
+                                        <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[300px]">
+                                            {{level3.name}}
+                                        </p>
+                                    </td>
+                                    <td *ngIf="level3.renamable" colspan="1" class="px-4 py-1 text-[14px]">
+                                        <cell-input #renameCell [type]="'text'"
+                                            [class]="'rename-cell-input text-left text-[14px] w-[200px] border-none shadow-none outline-none'"
+                                            [(value)]="level3.name"
+                                            (keydown.enter)="level3.renamable = false; handleNextCell(level3, 0)"
+                                            (onBlurFunc)="level3.renamable = false;" />
+                                    </td>
+                            
+                                    <ng-container *ngIf="level3.values">
+                                        <ng-container *ngFor="let month of months(); let monthIndex = index; trackBy: trackByIndex">
+                                            <td colspan="1" class="px-2 py-1 text-[14px]">
+                                                <cell-input #cell [type]="'number'" [row]="level3" [colIndex]="monthIndex"
+                                                    [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
+                                                    [value]="level3.values[monthIndex]" (valueChange)="updateRowByValue(level3, $event, monthIndex)"
+                                                    (keydown)="handleKeyDown($event, level3, monthIndex)"
+                                                    (contextmenu)="$event.preventDefault(); applyToAll($event, level3, monthIndex)" />
+                                            </td>
+                                        </ng-container>
+                                    </ng-container>
+                                </tr>
+                            </ng-container>
+
                             <tr>
-                                <td colspan="1" class="px-4 py-1">
-                                    <p-checkbox [(ngModel)]="level3.checked"
-                                        (ngModelChange)="onCheckBoxChange(level3, $event)" [binary]="true" />
-                                </td>
-                                <td *ngIf="!level3.renamable" colspan="1"
-                                    class="px-4 py-1 font-medium text-[14px] cursor-pointer"
-                                    (dblclick)="level3.renamable = true;">
-                                    <p pTooltip="Double-tab to edit name" tooltipPosition="top" class="w-[300px]">
-                                        {{level3.name}}
+                                <td colspan="2" class="px-2 py-1 text-[14px] font-medium cursor-pointer"
+                                    (click)="addNewRowCategory(level2, 0)">
+                                    <p class="flex flex-row align-items-center">
+                                        <i class="pi pi-plus-circle mr-1" style="align-self: center;"></i>Add a sub-category
                                     </p>
                                 </td>
-                                <td *ngIf="level3.renamable" colspan="1" class="px-4 py-1 text-[14px]">
-                                    <cell-input #renameCell [type]="'text'"
-                                        [class]="'rename-cell-input text-left text-[14px] w-[200px] border-none shadow-none outline-none'"
-                                        [(value)]="level3.name"
-                                        (keydown.enter)="level3.renamable = false; handleNextCell(level3, 0)"
-                                        (onBlurFunc)="level3.renamable = false;" />
-                                </td>
+                                <td *ngFor="let month of months()" class="px-2 py-1"></td>
+                            </tr>
 
-                                <ng-container *ngIf="level3.values">
-                                    <ng-container
-                                        *ngFor="let month of months(); let monthIndex = index; trackBy: trackByIndex">
-                                        <td colspan="1" class="px-2 py-1 text-[14px]">
-                                            <cell-input #cell [type]="'number'" [row]="level3" [colIndex]="monthIndex"
-                                                [class]="'cell-input text-center text-[14px] w-full border-none shadow-none outline-none'"
-                                                [value]="level3.values[monthIndex]"
-                                                (valueChange)="updateRowByValue(level3, $event, monthIndex)"
-                                                (keydown)="handleKeyDown($event, level3, monthIndex)"
-                                                (contextmenu)="$event.preventDefault(); applyToAll($event, level3, monthIndex)" />
-                                        </td>
-                                    </ng-container>
-                                </ng-container>
+                            <tr>
+                                <td colspan="2" class="px-2 py-1 text-[14px] font-medium">Sub Totals ({{level2.name}}) </td>
+                                <td *ngFor="let month of months(); let monthIndex = index"
+                                    class="px-2 py-1 text-[14px] text-center font-medium">{{level2.totals[monthIndex]}}</td>
                             </tr>
                         </ng-container>
-
-                        <tr>
-                            <td colspan="2" class="px-2 py-1 text-[14px] font-medium cursor-pointer"
-                                (click)="addNewRowCategory(level2, 0)">
-                                <p class="flex flex-row align-items-center">
-                                    <i class="pi pi-plus-circle mr-1" style="align-self: center;"></i>Add a sub-category
-                                </p>
-                            </td>
-                            <td *ngFor="let month of months()" class="px-2 py-1"></td>
-                        </tr>
-
-                        <tr class="z-0">
-                            <td colspan="2" class="px-2 py-1 text-[14px] font-medium">Sub Totals ({{level2.name}}) </td>
-                            <td *ngFor="let month of months(); let monthIndex = index"
-                                class="px-2 py-1 text-[14px] text-center font-medium">{{level2.totals[monthIndex]}}</td>
-                        </tr>
                     </ng-container>
 
                     <tr>
@@ -128,7 +145,7 @@
                     </tr>
 
                     <tr>
-                        <td colspan="2" class="px-2 py-1 text-[18px] font-medium cursor-pointer"
+                        <td colspan="2" class="px-2 py-1 text-[16px] font-medium cursor-pointer"
                             (click)="addNewRowCategory(level1, 1)">
                             <p class="flex flex-row align-items-center">
                                 <i class="pi pi-plus-circle mr-1" style="align-self: center;"></i>Add new category
