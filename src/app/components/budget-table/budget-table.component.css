@@ -11,9 +11,9 @@ table {
 }
 
 .table-scroll-wrapper {
-  max-height: 90vh; /* or any height you want */
+  max-height: 88vh; /* or any height you want */
   overflow: auto;
-  position: relative;
+    position: relative;
 }
 
 /* Sticky header */
