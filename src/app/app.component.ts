@@ -18,11 +18,32 @@ export class AppComponent {
     constructor() {
     }
 
+    /**
+     * Returns the start date of the selected date range.
+     *
+     * @returns {Date | undefined} The start date, or undefined if not set.
+     */
     get startDate(): Date | undefined {
         return this.dateRange ? this.dateRange[0] : undefined;
     }
 
+    /**
+     * Returns the end date of the selected date range.
+     *
+     * @returns {Date | undefined} The end date, or undefined if not set.
+     */
     get endDate(): Date | undefined {
         return this.dateRange ? this.dateRange[1] : undefined;
+    }
+
+    /**
+     * Blurs (removes focus from) the date picker input element after the date range is selected or closed.
+     *
+     * @param {any} picker - The date picker component reference.
+     */
+    blurDatePickerInput(picker: any) {
+        // Find the input element and blur it
+        const input = picker?.el?.nativeElement?.querySelector('input');
+        if (input) input.blur();
     }
 }

@@ -8,7 +8,6 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ToastModule } from 'primeng/toast';
 import { CellInputComponent } from '../cell-input/cell-input.component';
-import _ from 'lodash';
 
 export interface BudgetRows {
     id: number;
@@ -194,6 +193,7 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
     data: WritableSignal<BudgetRows[]> = signal<BudgetRows[]>([]);
     @ViewChildren('cell') cellInputs!: QueryList<CellInputComponent>;
     @ViewChildren('renameCell') renameCells!: QueryList<CellInputComponent>;
+    private timeout: number = 250;
 
     constructor(private confirmationService: ConfirmationService, private messageService: MessageService) {
         this.initializeDataRows(BudgetRows);
@@ -212,30 +212,52 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        console.log("ngAfterViewInit", this.data());
-        
         const firstCell = this.cellInputs?.get(0);
         firstCell?.focus();
 
         this.cellInputs.changes.subscribe((inputs: QueryList<CellInputComponent>) => {
-            inputs.get(0)?.focus();
+            setTimeout(() => inputs.get(0)?.focus(), this.timeout)
         });
 
         this.renameCells.changes.subscribe((inputs: QueryList<CellInputComponent>) => {
-            inputs.get(0)?.focus();
+            setTimeout(() => inputs.get(0)?.focus(), this.timeout)
         });
     }
 
-    headlines = computed(() => {
+    readonly headlines = computed(() => {
         const start = this.startMonth().toLocaleString('default', { month: "2-digit", year: 'numeric' });
         const end = this.endMonth().toLocaleString('default', { month: "2-digit", year: 'numeric' });
         return `Start from: ${start} to: ${end}`;
+    });
+
+    readonly months = computed(() => {
+        const months: string[] = [];
+        const start = new Date(this.startMonth());
+        const end = new Date(this.endMonth());
+
+        while (start <= end) {
+            const monthStr = start.toLocaleString('default', { month: "short", year: 'numeric' });
+            months.push(monthStr);
+            start.setMonth(start.getMonth() + 1);
+        }
+        return months;
     });
 
     trackById(index: number, item: BudgetRows): number {
         return item.id;
     }
 
+    trackByIndex(index: number, item: any): number {
+        return index;
+    }
+
+    /**
+     * Handles the change event for a checkbox in the budget table.
+     * Propagates the checked state to all child nodes recursively.
+     *
+     * @param {BudgetRows} row - The row whose checkbox state changed.
+     * @param {boolean} checked - The new checked state.
+     */
     onCheckBoxChange(row: BudgetRows, checked: boolean): void {
         console.log("onCheckBoxChange", row);
         if (row.children && row.children.length > 0) {
@@ -246,7 +268,13 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         }
     }
 
-    handleNextCell(row: BudgetRows, colIndex = 0): void {
+    /**
+     * Moves focus to the next cell input in the table based on the current row and column index.
+     *
+     * @param {BudgetRows} row - The current row.
+     * @param {number} [colIndex=0] - The current column index.
+     */
+    handleNextCell(row: BudgetRows, colIndex: number = 0): void {
         // Lấy danh sách cell input
         const cells = this.cellInputs.toArray();
         // Tìm index của cell hiện tại trong danh sách
@@ -254,6 +282,14 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         cells[currentIndex]?.focus();
     }
 
+    /**
+     * Handles keyboard navigation for cell inputs.
+     * Supports arrow keys for navigation and Enter for adding new rows or moving down.
+     *
+     * @param {KeyboardEvent} event - The keyboard event.
+     * @param {BudgetRows} row - The current row.
+     * @param {number} colIndex - The current column index.
+     */
     handleKeyDown(event: KeyboardEvent, row: BudgetRows, colIndex: number): void {
         console.log("handleKeyDown", event.key, row, colIndex);
         // Lấy danh sách cell input
@@ -296,6 +332,14 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         }
     }
 
+    /**
+     * Updates the value of a specific cell in a row for a given month.
+     * Finds the target row by id and updates its value, then refreshes the data tree.
+     *
+     * @param {BudgetRows} row - The row to update.
+     * @param {string | number} value - The new value to set.
+     * @param {number} monthIndex - The index of the month to update.
+     */
     updateRowByValue(row: BudgetRows, value: string | number, monthIndex: number): void {
         function updateLeaf(nodes: BudgetRows[]): boolean {
             for (const node of nodes) {
@@ -316,6 +360,13 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         this.setBudgetRows(data);
     }
 
+    /**
+     * Shows a confirmation popup and, if accepted, applies the value of the selected cell to all months in the row.
+     *
+     * @param {Event} event - The triggering event (usually right-click/context menu).
+     * @param {BudgetRows} row - The row to apply the value to.
+     * @param {number} monthIndex - The index of the month whose value will be applied to all months.
+     */
     applyToAll(event: Event, row: BudgetRows, monthIndex: number): void {
         this.confirmationService.confirm({
             target: event.target as EventTarget,
@@ -357,14 +408,26 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         });
     }
 
-    addNewRowCategory(row: BudgetRows, level = 0): void {
+    /**
+     * Adds a new row or category as a child of the specified row, at the given level.
+     * The new row/category is initialized with blank values.
+     *
+     * @param {BudgetRows} row - The parent row to add the new row/category to.
+     * @param {number} [level=0] - The depth/level of the new row/category.
+     */
+    addNewRowCategory(row: BudgetRows, level: number = 0): void {
         const index = row.children?.length ?? 0;
         const newRow: BudgetRows = this.generateBlankNode(level, this.months().length);
         row.children?.splice(index + 1, 0, newRow);
         this.updateTotalsRecursively(this.data());
         this.data.set(this.data());
+        this.handleMessage('success', 'Created', level === 0 ? 'Row has been created.' : 'Rows have been created.');
     }
 
+    /**
+     * Deletes all rows (and their children) in the budget tree that have the checked property set to true.
+     * Updates the data tree and shows a success message after deletion.
+     */
     deleteRows() {
         function filterUnchecked(nodes: BudgetRows[]): BudgetRows[] {
             return nodes
@@ -380,7 +443,14 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         this.handleMessage('success', 'Deleted', 'Checked rows have been deleted.');
     }
 
-    calcuateOpeningBalance(rows: BudgetRows): number [] {
+    /**
+     * Calculates the opening balance for each month.
+     * The first month is always 0; each subsequent month is the previous opening balance plus the previous month's profit.
+     *
+     * @param {BudgetRows} rows - The row whose totals are used for calculation.
+     * @returns {number[]} An array of opening balances for each month.
+     */
+    calculateOpeningBalance(rows: BudgetRows): number[] {
         const monthsCount = this.months().length;
         const profits = rows.totals ?? [];
         const openingBalances: number[] = Array(monthsCount).fill(0);
@@ -391,10 +461,17 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         return openingBalances;
     }
 
-    calcuateClosingBalance(rows: BudgetRows): number[] {
+    /**
+     * Calculates the closing balance for each month.
+     * Each month's closing balance is the sum of the opening balance and the profit for that month.
+     *
+     * @param {BudgetRows} rows - The row whose totals are used for calculation.
+     * @returns {number[]} An array of closing balances for each month.
+     */
+    calculateClosingBalance(rows: BudgetRows): number[] {
         const monthsCount = this.months().length;
         const profits = rows.totals ?? [];
-        const openingBalances = this.calcuateOpeningBalance(rows);
+        const openingBalances = this.calculateOpeningBalance(rows);
         const closingBalances: number[] = Array(monthsCount).fill(0);
 
         for (let i = 0; i < monthsCount; i++) {
@@ -404,26 +481,27 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
 
     }
 
-    readonly months = computed(() => {
-        const months: string[] = [];
-        const start = new Date(this.startMonth());
-        const end = new Date(this.endMonth());
-
-        while (start <= end) {
-            const monthStr = start.toLocaleString('default', { month: "short", year: 'numeric' });
-            months.push(monthStr);
-            start.setMonth(start.getMonth() + 1);
-        }
-        return months;
-    });
-
+    /**
+     * Updates the entire budget rows data tree.
+     * Recalculates totals for all nodes and updates the reactive data signal with a new array reference.
+     *
+     * @param {BudgetRows[]} rows - The new budget rows data to set.
+     */
     private setBudgetRows(rows: BudgetRows[]): void {
         // update totals value a whole tree
         this.updateTotalsRecursively(rows);
         // set new data
-        this.data.set(rows);
+        this.data.set([...rows]);
     }
 
+    /**
+     * Recursively sets the values array for all leaf nodes in the BudgetRows tree.
+     * If a node is a leaf (no children), its values array is set to the provided values,
+     * keeping existing values if present, otherwise using the default from the input array.
+     *
+     * @param {BudgetRows[]} nodes - The array of nodes to update.
+     * @param {number[]} values - The default values to set for each month in leaf nodes.
+     */
     private setLeafValuesRecursively(nodes: BudgetRows[], values: number[]) {
         for (const node of nodes) {
             if (node.children && node.children.length > 0) {
@@ -437,6 +515,14 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         }
     }
 
+    /**
+     * Recursively searches for the parent node of a given target node within a tree of BudgetRows.
+     *
+     * @param {BudgetRows[]} nodes - The array of nodes to search within.
+     * @param {BudgetRows} target - The node whose parent is being searched for.
+     * @param {BudgetRows | null} [parent=null] - The current parent node in the recursion (used internally).
+     * @returns {BudgetRows | null} The parent node if found, otherwise null.
+     */
     private findParent(nodes: BudgetRows[], target: BudgetRows, parent: BudgetRows | null = null): BudgetRows | null {
         for (const node of nodes) {
             if (node.id === target.id) {
@@ -450,8 +536,16 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         return null;
     }
 
+    /**
+     * Inserts a new row immediately after the specified row within the parent's children array.
+     * The new row is initialized as a leaf node with default values for all months.
+     * After insertion, totals are recalculated and the data signal is updated.
+     *
+     * @param {BudgetRows} parent - The parent node containing the children array.
+     * @param {BudgetRows} afterRow - The row after which the new row will be inserted.
+     */
     private addRowAfterRow(parent: BudgetRows, afterRow: BudgetRows) {
-        const newId = Date.now(); // Hoặc cách sinh id khác
+        const newId = Date.now();
         const newRow: BudgetRows = {
             id: newId,
             name: 'New Row',
@@ -461,16 +555,25 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
             values: Array(this.months().length).fill(0)
         };
         const idx = parent.children!.findIndex(child => child.id === afterRow.id);
-        parent.children!.splice(idx + 1, 0, newRow);
-        this.updateTotalsRecursively(this.data());
-        this.data.set(this.data());
+        if (idx !== -1) {
+            parent.children!.splice(idx + 1, 0, newRow);
+            this.updateTotalsRecursively(this.data());
+            this.data.set([...this.data()]);
+        }
     }
 
+    /**
+     * Initializes the budget data tree.
+     * Sets default values for all leaf nodes based on the current months,
+     * recalculates totals for all nodes, and updates the reactive data signal.
+     *
+     * @param {BudgetRows[]} [data=BudgetRows] - The initial data tree to initialize. Defaults to the static BudgetRows.
+     */
     private initializeDataRows(data: BudgetRows[] = BudgetRows) {
         const values = Array(this.months().length).fill(0);
         this.setLeafValuesRecursively(data, values);
         this.updateTotalsRecursively(data);
-        this.data.set(data);
+        this.data.set([...data]);
     }
     
     /**
@@ -478,23 +581,6 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
      * totals[i] = the sum of values[i] of all child nodes (if any), or the node's own values[i] if it is a leaf node.
      */
     private updateTotalsRecursively(nodes: BudgetRows[]) {
-        // for (const node of nodes) {
-        //     if (node.children && node.children.length > 0) {
-        //         // Đệ quy cập nhật totals cho các node con trước
-        //         this.updateTotalsRecursively(node.children);
-        //         // Tính tổng totals từ các node con
-        //         const childTotals = node.children.map(child => child.totals || []);
-        //         const totals: number[] = [];
-        //         const maxLen = Math.max(...childTotals.map(arr => arr.length));
-        //         for (let i = 0; i < maxLen; i++) {
-        //             totals[i] = childTotals.reduce((sum, arr) => sum + (arr[i] || 0), 0);
-        //         }
-        //         node.totals = totals;
-        //     } else if (node.values !== undefined) {
-        //         // Nếu là node lá, totals = values
-        //         node.totals = [...node.values];
-        //     }
-        // }
         for (const node of nodes) {
             if (node.children && node.children.length > 0) {
                 // Recursively update totals for child nodes first
@@ -533,6 +619,15 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         }
     }
 
+    /**
+     * Recursively generates a blank BudgetRows node.
+     * If level < 1, returns a leaf node with values for each month.
+     * If level >= 1, returns a category node with one child node, where the child is generated with (level - 1).
+     *
+     * @param {number} level - The depth of the node to generate. 0 for leaf, >0 for nested categories.
+     * @param {number} monthsCount - The number of months (length of values/totals arrays).
+     * @returns {BudgetRows} A new BudgetRows node, possibly with children.
+     */
     private generateBlankNode(level: number, monthsCount: number): BudgetRows {
         const id = Date.now() + Math.floor(Math.random() * 10000 * Math.random());
         if (level < 1) {

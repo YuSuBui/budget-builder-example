@@ -82,7 +82,7 @@
                                     </td>
     
                                     <ng-container *ngIf="level4.values">
-                                        <ng-container *ngFor="let month of months(); let monthIndex = index;">
+                                        <ng-container *ngFor="let month of months(); let monthIndex = index; trackBy: trackByIndex">
                                             <td class="px-2 py-1 text-[14px]">
                                                 <cell-input #cell [type]="'number'"
                                                     [row]="level4"
@@ -151,7 +151,8 @@
             <tfoot class="bg-gray-200">
                 <tr class="bg-gray-200 font-medium">
                     <td colspan="2" class="px-2 py-1 text-[16px]">Profit / Loss</td>
-                    <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-center text-[16px]">
+                    <td *ngFor="let month of months(); let monthIndex = index; trackBy: trackByIndex"
+                        class="px-2 py-1 text-center text-[16px]">
                         {{ level1.totals ? level1.totals[monthIndex] : 0 }}
                     </td>
                 </tr>
@@ -159,14 +160,14 @@
                 <tr class="bg-gray-200 font-medium">
                     <td colspan="2" class="px-2 py-1 text-[16px]">Opening Balance</td>
                     <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-center text-[16px]">
-                        {{calcuateOpeningBalance(level1)[monthIndex]}}
+                        {{calculateOpeningBalance(level1)[monthIndex]}}
                     </td>
                 </tr>
 
                 <tr class="bg-gray-200 font-medium">
                     <td colspan="2" class="px-2 py-1 text-[16px]">Closing Balance</td>
                     <td *ngFor="let month of months(); let monthIndex = index" class="px-2 py-1 text-center text-[16px]">
-                        {{calcuateClosingBalance(level1)[monthIndex]}}
+                        {{calculateClosingBalance(level1)[monthIndex]}}
                     </td>
                 </tr>
 

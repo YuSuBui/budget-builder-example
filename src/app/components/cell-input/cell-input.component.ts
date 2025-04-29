@@ -20,20 +20,32 @@ export class CellInputComponent {
     @Output() onBlurFunc = new EventEmitter<void>();
     @ViewChild('input') myInputRef!: ElementRef<HTMLInputElement>;
 
-    onInputChange(text: string) {
+    /**
+     * Handles input changes and emits the new value.
+     * If the input type is 'number', only numeric characters are allowed.
+     *
+     * @param {string} value - The new input value as a string.
+     */
+    onInputChange(value: string) {
         if (this.type === 'number') {
-            const transform = text.replace(/[^0-9]/g, '');
-            this.value = Number(transform)
-            this.valueChange.emit(Number(transform));
-        } else if (this.type === 'text') {
-            this.valueChange.emit(text);
+            const num = Number(value.replace(/[^0-9]/g, ''));
+            this.value = num;
+            this.valueChange.emit(num);
+        } else {
+            this.valueChange.emit(value);
         }
     }
 
+    /**
+     * Sets focus to the input element.
+     */
     focus(): void {
         this.myInputRef.nativeElement.focus();
     }
-    
+
+    /**
+     * Applies focus styling to the parent cell when the input gains focus.
+     */
     onFocusFunc(): void {
         const parent = this.myInputRef.nativeElement.parentElement?.parentElement;
         if (parent) {
@@ -42,6 +54,9 @@ export class CellInputComponent {
         }
     }
 
+    /**
+     * Removes focus styling from the parent cell and emits the blur event when the input loses focus.
+     */
     onUnFocusFunc(): void {
         const parent = this.myInputRef.nativeElement.parentElement?.parentElement;
         if (parent) {
