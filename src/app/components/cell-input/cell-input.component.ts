@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BudgetRows } from '../budget-table/budget-table.component';
+import { IRowTree } from '../../model/budget-row.model';
 
 @Component({
     selector: 'cell-input',
@@ -12,7 +12,7 @@ import { BudgetRows } from '../budget-table/budget-table.component';
 })
 export class CellInputComponent {
     @Input() type!: 'number' | 'text';
-    @Input() row!: BudgetRows;
+    @Input() row!: IRowTree;
     @Input() colIndex!: number;
     @Input() class!: string;
     @Input() value!: number | string;

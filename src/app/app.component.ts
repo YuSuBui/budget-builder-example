@@ -3,6 +3,8 @@ import { BudgetTableComponent } from './components/budget-table/budget-table.com
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
+import { IRowTree, RawBudgetData } from './model/budget-row.model';
+import { migrateBudgetRowsToTree } from './utils';
 
 @Component({
     selector: 'app-root',
@@ -14,8 +16,10 @@ import { DatePickerModule } from 'primeng/datepicker';
 export class AppComponent {
     title = 'budget-builder-example';
     dateRange: Date[] = [new Date(2024, 0), new Date(2024, 11)];
+    data: IRowTree[] = [];
 
     constructor() {
+        this.data = migrateBudgetRowsToTree(RawBudgetData);
     }
 
     /**
