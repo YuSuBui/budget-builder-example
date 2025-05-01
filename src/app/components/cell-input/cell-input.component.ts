@@ -50,7 +50,7 @@ export class CellInputComponent {
         const parent = this.myInputRef.nativeElement.parentElement?.parentElement;
         if (parent) {
             parent.style.border = '1.5px solid #000';
-            parent.style.backgroundColor = "rgb(255, 255, 200)";
+            parent.style.backgroundColor = "rgb(255, 255, 215)";
         }
     }
 

@@ -3,7 +3,7 @@
         <div class="p-4 flex flex-wrap flex-row justify-between items-center">
             <h2 class="text-2xl font-bold text-center">Budget Builder Example</h2>
             <div class="flex flex-wrap flex-row items-center date-range">
-                <span class="font-medium w-[120px]">Date range:</span>
+                <span class="ml-2 mr-2 font-[600]">Date range:</span>
                 <p-datepicker #picker [(ngModel)]="dateRange" selectionMode="range" view="month" dateFormat="mm/yy"
                     (onClose)="blurDatePickerInput(picker)">
                 </p-datepicker>

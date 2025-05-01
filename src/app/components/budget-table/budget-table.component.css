@@ -10,18 +10,18 @@
   position: relative;
 }
 
-::ng-deep .p-button.trash-button {
+:host ::ng-deep .p-button.trash-button {
   width: 16px;
   height: 16px;
-  color: #000;
+  color: #212529;
 }
 
-::ng-deep .p-button.trash-button:hover {
-  color: #ff0000;
+:host ::ng-deep .p-button.trash-button:hover {
+  color: #111827;
 }
 
-::ng-deep .p-button.trash-button,
-::ng-deep .p-button.trash-button:hover {
+:host ::ng-deep .p-button.trash-button,
+:host ::ng-deep .p-button.trash-button:hover {
     background: transparent !important;
     border: 0 !important;
 }
@@ -35,45 +35,4 @@ table {
 
 td, th {
   border: 0.75px solid #000;
-}
-
-tfoot,
-thead {
-  position: sticky;
-  z-index: 6;
-  background: #fff;
-}
-
-thead {
-  top: 0;
-}
-
-thead th:nth-child(n + 3) {
-  min-width: 120px;
-}
-
-thead tr th,
-tfoot tr td:first-child {
-  background: #ccc;
-  color: #000;
-}
-
-tfoot {
-  bottom: 0;
-}
-
-th:first-child, 
-td:first-child {
-  position: sticky;
-  left: 0;
-  background: #fff;
-  z-index: 5;
-}
-
-th:nth-child(2), td[colspan='1']:nth-child(2) {
-  position: sticky;
-  left: 53px;
-  background: #fff;
-  z-index: 5;
-  min-width: 200px;
 }

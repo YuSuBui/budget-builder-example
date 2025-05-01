@@ -494,7 +494,7 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
         } else {
             return {
                 id: id.toString(),
-                name: `New Category (${nameLevel > 2 ? '2nd' : '1st'} Level)`,
+                name: `New Category (${nameLevel > 2 ? '2nd' : '1st'})`,
                 renamable: true,
                 checked: false,
                 operation: 'sum',
