@@ -28,6 +28,7 @@
 
 table {
   width: 100%;
+  table-layout: auto;
   border-collapse: separate;
   border-spacing: 0;
   border: 0.75px solid #000;
@@ -35,4 +36,10 @@ table {
 
 td, th {
   border: 0.75px solid #000;
+}
+
+th:first-child {
+  width: 29px;
+  min-width: 29px;
+  max-width: 29px;
 }

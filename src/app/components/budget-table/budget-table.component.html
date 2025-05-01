@@ -2,8 +2,9 @@
     <table class="table-auto" style="width: 100%;">
         <thead class="sticky top-0 z-[6]">
             <tr class="bg-[#f3f6f9] color-[#212529]">
-                <th colspan="1" class="sticky top-0 left-0 left-0 font-[600] bg-[#dee2e6] color-[#212529]">
-                    <p-button icon="pi pi-trash" pTooltip="Click to delete all selected rows" tooltipPosition="top" (click)="deleteRows()" styleClass="trash-button" />
+                <th colspan="1" class="sticky top-0 left-0 left-0 font-[600] text-center bg-[#dee2e6] color-[#212529]">
+                    <p-button icon="pi pi-trash" pTooltip="Click to delete all selected rows" tooltipPosition="top" (click)="deleteRows()" 
+                        styleClass="trash-button" />
                 </th>
                 <th colspan="1"
                     class="px-2 py-2 w-[300px] min-w-[300px] sticky top-0 left-[29px] font-[600] text-left text-[18px] bg-[#dee2e6] color-[#212529]">
@@ -18,7 +19,7 @@
         <ng-container *ngFor="let level1 of tree();let level1Index = index; trackBy: trackById">
             <tbody>
                 <tr>
-                    <td colspan="1" class="px-1 py-1 sticky left-0 z-[5] font-[500] color-[#212529] bg-[#e9ecef]">
+                    <td colspan="1" class="px-1 py-1 sticky left-0 z-[5] font-[500] text-center color-[#212529] bg-[#e9ecef]">
                         <p-checkbox [(ngModel)]="level1.checked" (ngModelChange)="onCheckBoxChange(level1, $event)"
                             [binary]="true" />
                     </td>
@@ -42,7 +43,7 @@
                 <ng-container *ngIf="level1.children">
                     <ng-container *ngFor="let level2 of level1.children; let level2Index = index; trackBy: trackById">
                         <tr>
-                            <td colspan="1" class="px-1 py-1 sticky left-0 z-[5] color-[#212529] bg-[#ffffff]">
+                            <td colspan="1" class="px-1 py-1 sticky left-0 z-[5] text-center color-[#212529] bg-[#ffffff]">
                                 <p-checkbox 
                                     [binary]="true"
                                     [(ngModel)]="level2.checked"
@@ -84,7 +85,7 @@
                         <ng-container *ngIf="level2.children">
                             <ng-container *ngFor="let level3 of level2.children; trackBy: trackById">
                                 <tr>
-                                    <td colspan="1" class="px-1 py-1 sticky left-0 z-[5] color-[#212529] bg-[#ffffff]">
+                                    <td colspan="1" class="px-1 py-1 sticky left-0 z-[5] text-center color-[#212529] bg-[#ffffff]">
                                         <p-checkbox [(ngModel)]="level3.checked" (ngModelChange)="onCheckBoxChange(level3, $event)"
                                             [binary]="true" />
                                     </td>
