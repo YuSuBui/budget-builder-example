@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, Input, OnChanges, QueryList, signal, SimpleChanges, ViewChildren, WritableSignal } from '@angular/core';
+import { AfterViewInit, Component, computed, Input, OnChanges, QueryList, signal, ViewChildren, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -34,18 +34,11 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
     constructor(private confirmationService: ConfirmationService, private messageService: MessageService) {
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['startDate'] && this.startDate ) {
-            this.startMonth.set(this.startDate);
-        }
-
-        if (changes['endDate'] && this.endDate) {
-            this.endMonth.set(this.endDate);
-        }
-
-        if (changes['data'] && this.data) {
-            this.initializeRowTreeData(this.data);
-        }
+    ngOnChanges(): void {
+        if(!this.startDate || !this.endDate) return;
+        this.startMonth.set(this.startDate);
+        this.endMonth.set(this.endDate);
+        this.initializeRowTreeData(this.data);
     }
 
     ngAfterViewInit() {
@@ -420,6 +413,7 @@ export class BudgetTableComponent implements OnChanges, AfterViewInit {
      * @param {IRowTree[]} [nodes = IRowTree[]] - The initial data tree to initialize. Defaults to the static BudgetRows.
      */
     private initializeRowTreeData(nodes: IRowTree[] = []) {
+        if (!nodes) return;
         const values = Array(this.months().length).fill(0);
         this.setLeafValuesRecursively(nodes, values);
         this.updateTotalsRecursively(nodes);
